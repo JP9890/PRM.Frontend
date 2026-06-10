@@ -1,0 +1,53 @@
+<div class="container mt-4" style="max-width: 700px;">
+  <a routerLink="/admin" class="text-decoration-none small">&larr; Back to Admin Panel</a>
+  <h2 class="mt-2 mb-3">System Configuration</h2>
+
+  <div *ngIf="isLoading" class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+
+  <div class="card shadow-sm" *ngIf="!isLoading && settings">
+    <div class="card-body">
+      <div class="mb-4 p-3 bg-light rounded">
+        <h6>Current Settings</h6>
+        <p class="mb-1"><strong>LLM Provider:</strong> {{ settings.llmProvider }}</p>
+        <p class="mb-1"><strong>LLM API Key:</strong> {{ settings.llmApiKeyMasked || '(not set)' }}</p>
+        <p class="mb-1"><strong>Scheduler Interval:</strong> {{ settings.schedulerIntervalHours }} hours</p>
+        <p class="mb-0"><strong>Max Weekly Hours:</strong> {{ settings.maxWeeklyHours }}</p>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Update LLM API Key</label>
+        <div class="input-group">
+          <input type="password" class="form-control" [(ngModel)]="newApiKey" placeholder="Enter new API key" />
+          <button class="btn btn-primary" (click)="saveApiKey()" [disabled]="!newApiKey">Update</button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Change LLM Provider</label>
+        <div class="input-group">
+          <select class="form-select" [(ngModel)]="selectedProvider">
+            <option value="Gemini">Gemini</option>
+            <option value="Groq">Groq</option>
+          </select>
+          <button class="btn btn-primary" (click)="saveProvider()">Update</button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label">Scheduler Interval (hours)</label>
+        <div class="input-group">
+          <input type="number" class="form-control" [(ngModel)]="schedulerHours" min="1" max="168" />
+          <button class="btn btn-primary" (click)="saveScheduler()">Update</button>
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label">Max Weekly Hours</label>
+        <div class="input-group">
+          <input type="number" class="form-control" [(ngModel)]="maxWeeklyHours" min="1" max="168" />
+          <button class="btn btn-primary" (click)="saveMaxHours()">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

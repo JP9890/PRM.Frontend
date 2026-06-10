@@ -1,0 +1,26 @@
+<div class="container mt-4" style="max-width: 600px;">
+  <a routerLink="/user/employees" class="text-decoration-none small">&larr; Back to Employees</a>
+  <div class="card shadow-sm mt-2">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Assign Manager</h4>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label class="form-label">Employee User ID</label>
+          <input type="number" class="form-control" formControlName="employeeUserId" />
+          <small class="text-muted">The user ID of the employee account.</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Manager User ID</label>
+          <input type="number" class="form-control" formControlName="managerUserId" />
+          <small class="text-muted">The user ID of the manager account.</small>
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" routerLink="/user/employees">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

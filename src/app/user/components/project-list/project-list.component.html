@@ -1,0 +1,39 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <a routerLink="/user" class="text-decoration-none small">&larr; Back to Admin Panel</a>
+      <h2 class="mt-1 mb-0">Manage Projects</h2>
+    </div>
+    <button class="btn btn-primary" routerLink="/user/projects/new">Create Project</button>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+
+  <table class="table table-striped table-hover" *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Manager</th>
+        <th>End Date</th>
+        <th>Status</th>
+        <th>SP Done/Total</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of projects">
+        <td>{{ p.id }}</td>
+        <td>{{ p.name }}</td>
+        <td>{{ p.managerName }}</td>
+        <td>{{ p.endDate }}</td>
+        <td><span class="badge bg-secondary">{{ p.status }}</span></td>
+        <td>{{ p.completedStoryPoints }} / {{ p.totalStoryPoints }}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/user/projects/edit', p.id]">Edit / Milestones</button>
+        </td>
+      </tr>
+      <tr *ngIf="projects.length === 0"><td colspan="7" class="text-center">No projects found.</td></tr>
+    </tbody>
+  </table>
+</div>
