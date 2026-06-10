@@ -1,0 +1,44 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Login</h2>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          formControlName="username" 
+          class="form-control" 
+          [ngClass]="{ 'is-invalid': loginForm.get('username')?.invalid && loginForm.get('username')?.touched }"
+          placeholder="Enter username" />
+        <div class="invalid-feedback" *ngIf="loginForm.get('username')?.errors?.['required']">
+          Username is required.
+        </div>
+      </div>
+
+      <div class="form-group mt-3">
+        <label for="password">Password</label>
+        <div class="input-group">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="password" 
+            formControlName="password" 
+            class="form-control" 
+            [ngClass]="{ 'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched }"
+            placeholder="Enter password" />
+          <button class="btn btn-outline-secondary" type="button" (click)="togglePasswordVisibility()" style="border-top-right-radius: 0.375rem; border-bottom-right-radius: 0.375rem;">
+            <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i> {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+          <div class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.['required']">
+            Password is required.
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-4 w-100" [disabled]="isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+        Login
+      </button>
+    </form>
+  </div>
+</div>
