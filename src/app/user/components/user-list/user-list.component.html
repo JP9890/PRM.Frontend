@@ -1,0 +1,72 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <a routerLink="/admin" class="text-decoration-none small">&larr; Back to Admin Panel</a>
+      <h2 class="mt-1 mb-0">Manage Users</h2>
+    </div>
+    <button class="btn btn-primary" routerLink="/user/users/new">Create New User</button>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-4">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <div class="alert alert-info" *ngIf="!isLoading">
+    Total: {{ users.length }} | Active: {{ activeCount }} | Inactive: {{ inactiveCount }}
+  </div>
+
+  <table class="table table-striped table-hover" *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Full Name</th>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td>{{ user.id }}</td>
+        <td>{{ user.fullName }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.roleName }}</td>
+        <td>
+          <span class="badge" [ngClass]="user.isActive ? 'bg-success' : 'bg-secondary'">
+            {{ user.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+        <td class="text-nowrap">
+          <button class="btn btn-sm btn-outline-secondary me-1" [routerLink]="['/user/users/edit', user.id]">Edit</button>
+          <button class="btn btn-sm btn-outline-warning me-1" (click)="openResetPassword(user)">Reset Pwd</button>
+          <button *ngIf="user.isActive" class="btn btn-sm btn-outline-danger me-1" (click)="deactivateUser(user)">Deactivate</button>
+          <button *ngIf="!user.isActive" class="btn btn-sm btn-outline-success" (click)="reactivateUser(user)">Reactivate</button>
+        </td>
+      </tr>
+      <tr *ngIf="users.length === 0">
+        <td colspan="6" class="text-center">No users found.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showResetModal" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reset Password — {{ selectedUser?.fullName }}</h5>
+        <button type="button" class="btn-close" (click)="closeResetModal()"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label">New Temporary Password</label>
+        <input type="password" class="form-control" [(ngModel)]="newPassword" />
+        <small class="text-muted">Min 8 chars, one uppercase, one number. User must change on next login.</small>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeResetModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="confirmResetPassword()" [disabled]="!newPassword">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

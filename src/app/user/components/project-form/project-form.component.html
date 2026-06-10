@@ -1,0 +1,97 @@
+<div class="container mt-4">
+  <a routerLink="/user/projects" class="text-decoration-none small">&larr; Back to Projects</a>
+  <h2 class="mt-2">{{ isEditMode ? 'Update Project' : 'Create Project' }}</h2>
+
+  <div *ngIf="isLoading" class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+
+  <div class="row g-4" *ngIf="!isLoading">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form [formGroup]="projectForm" (ngSubmit)="onSaveProject()">
+            <div class="mb-3">
+              <label class="form-label">Project Name</label>
+              <input class="form-control" formControlName="name" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" rows="2" formControlName="description"></textarea>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label">Start Date</label>
+                <input type="date" class="form-control" formControlName="startDate" />
+              </div>
+              <div class="col-6">
+                <label class="form-label">End Date</label>
+                <input type="date" class="form-control" formControlName="endDate" />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Status</label>
+              <select class="form-select" formControlName="status">
+                <option value="PLANNED">PLANNED</option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="ON_HOLD">ON_HOLD</option>
+                <option value="COMPLETED">COMPLETED</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Project Manager</label>
+              <select class="form-select" formControlName="managerId">
+                <option value="" disabled selected>Select a Manager</option>
+                <option *ngFor="let m of managers" [value]="m.id">{{ m.fullName }} ({{ m.username }})</option>
+              </select>
+              <div *ngIf="projectForm.get('managerId')?.touched && projectForm.get('managerId')?.invalid" class="text-danger small">
+                Manager is required.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Total Story Points</label>
+              <input type="number" class="form-control" formControlName="totalStoryPoints" />
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="isSaving">Save Project</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6" *ngIf="isEditMode">
+      <div class="card shadow-sm">
+        <div class="card-header">Milestones</div>
+        <div class="card-body">
+          <table class="table table-sm" *ngIf="milestones.length > 0">
+            <thead><tr><th>#</th><th>Title</th><th>Due</th><th>SP</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let m of milestones">
+                <td>{{ m.sortOrder }}</td>
+                <td>{{ m.title }}</td>
+                <td>{{ m.dueDate }}</td>
+                <td>{{ m.storyPoints }}</td>
+                <td>
+                  <select class="form-select form-select-sm" [value]="m.status" (change)="updateMilestoneStatus(m, $event)">
+                    <option value="NOT_STARTED">NOT_STARTED</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="DONE">DONE</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p *ngIf="milestones.length === 0" class="text-muted">No milestones yet.</p>
+
+          <hr />
+          <h6>Add Milestone</h6>
+          <form [formGroup]="milestoneForm" (ngSubmit)="onAddMilestone()">
+            <div class="mb-2"><input class="form-control form-control-sm" placeholder="Title" formControlName="title" /></div>
+            <div class="row g-2 mb-2">
+              <div class="col-6"><input type="date" class="form-control form-control-sm" formControlName="dueDate" /></div>
+              <div class="col-6"><input type="number" class="form-control form-control-sm" placeholder="Story Points" formControlName="storyPoints" /></div>
+            </div>
+            <button type="submit" class="btn btn-sm btn-success">Add Milestone</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<div class="manager-projects container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">My Projects</h2>
+    <a routerLink="/manager/allocate" class="btn btn-primary">+ Allocate Resource</a>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Loading projects...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="row" *ngIf="!loading">
+    <div class="col-md-6 mb-4" *ngFor="let p of projects">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title text-primary">{{ p.name }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">End Date: {{ p.endDate }}</h6>
+          <p class="card-text">
+            <strong>Health:</strong>
+            <span class="badge ms-1"
+                  [class.bg-success]="p.health.includes('TRACK')"
+                  [class.bg-warning]="p.health.includes('ATTENTION')"
+                  [class.bg-danger]="p.health.includes('RISK')">
+              {{ p.health }}
+            </span>
+          </p>
+          <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-outline-primary btn-sm" [routerLink]="['/manager/projects', p.id]">
+              View Detail
+            </button>
+            <button class="btn btn-outline-info btn-sm" (click)="viewRiskSummary(p.id)">
+              🤖 AI Risk Summary
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="projects.length === 0" class="col-12">
+      <div class="alert alert-warning">No projects assigned to you.</div>
+    </div>
+  </div>
+
+  <div class="card mt-4 border-info" *ngIf="riskLoading || selectedProjectRisk">
+    <div class="card-header bg-info text-white">
+      🤖 AI Risk Summary
+    </div>
+    <div class="card-body">
+      <div *ngIf="riskLoading" class="spinner-border text-info" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p *ngIf="!riskLoading && selectedProjectRisk" class="mb-0">
+        {{ selectedProjectRisk }}
+      </p>
+    </div>
+  </div>
+</div>
+

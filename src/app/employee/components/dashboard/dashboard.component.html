@@ -1,0 +1,102 @@
+<div class="employee-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="welcome-section">
+        <div class="avatar">{{ employeeName.charAt(0).toUpperCase() }}</div>
+        <div>
+          <h1 class="welcome-title">Welcome back, <span class="name-highlight">{{ employeeName }}</span></h1>
+          <p class="welcome-sub">Here's your resource overview</p>
+        </div>
+      </div>
+      <div class="utilization-badge" [class.over-allocated]="totalUtilization > 100" [class.fully-allocated]="totalUtilization === 100" [class.partial]="totalUtilization > 0 && totalUtilization < 100" [class.bench]="totalUtilization === 0">
+        <div class="util-value">{{ totalUtilization }}%</div>
+        <div class="util-label">Utilization</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading your data...</p>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-body">
+    <!-- Missing Timesheet Alert -->
+    <div *ngIf="hasMissingTimesheet" class="alert-banner">
+      <span class="alert-icon">⚠</span>
+      <div>
+        <strong>Timesheet Reminder</strong>
+        <p>You have a missing timesheet for last week. Please submit it as soon as possible.</p>
+      </div>
+      <a routerLink="/employee/submit-timesheet" class="btn-alert">Submit Now</a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a routerLink="/employee/submit-timesheet" class="action-card primary">
+        <div class="action-icon">📋</div>
+        <div class="action-title">Submit Timesheet</div>
+        <div class="action-desc">Log hours for the current week</div>
+      </a>
+      <a routerLink="/employee/timesheets" class="action-card">
+        <div class="action-icon">📊</div>
+        <div class="action-title">My Timesheets</div>
+        <div class="action-desc">View your submission history</div>
+      </a>
+      <a routerLink="/employee/allocations" class="action-card">
+        <div class="action-icon">📌</div>
+        <div class="action-title">My Allocations</div>
+        <div class="action-desc">Projects you're assigned to</div>
+      </a>
+    </div>
+
+    <!-- Active Allocations Summary -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">Active Allocations</h2>
+        <a routerLink="/employee/allocations" class="see-all">View All →</a>
+      </div>
+      <div *ngIf="allocations.length === 0" class="empty-state">
+        <p>🏖 You are currently on bench. No active allocations.</p>
+      </div>
+      <div *ngIf="allocations.length > 0" class="allocations-grid">
+        <div *ngFor="let a of allocations" class="allocation-item">
+          <div class="project-name">{{ a.projectName }}</div>
+          <div class="alloc-meta">
+            <span class="alloc-percent">{{ a.utilizationPercent }}%</span>
+            <span class="alloc-dates">{{ a.fromDate }} → {{ a.toDate }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="a.utilizationPercent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Timesheets -->
+    <div class="section-card" *ngIf="recentTimesheets.length > 0">
+      <div class="section-header">
+        <h2 class="section-title">Recent Timesheets</h2>
+        <a routerLink="/employee/timesheets" class="see-all">View All →</a>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Week</th><th>Hours</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of recentTimesheets">
+            <td>{{ t.weekStartDate }}</td>
+            <td>{{ t.totalHours }} hrs</td>
+            <td>
+              <span class="status-badge" [class.submitted]="t.status === 'SUBMITTED'" [class.missed]="t.status === 'MISSED'">
+                {{ t.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

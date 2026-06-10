@@ -1,0 +1,87 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-inner">
+      <a routerLink="/employee/dashboard" class="back-link">← Dashboard</a>
+      <h1 class="page-title">📊 My Timesheets</h1>
+      <p class="page-subtitle">Your weekly hour submission history</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container"><div class="spinner"></div><p>Loading...</p></div>
+
+  <div *ngIf="!loading" class="page-body">
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value">{{ timesheets.length }}</div>
+        <div class="stat-label">Total Weeks</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value submitted-color">{{ totalSubmitted }}</div>
+        <div class="stat-label">Submitted</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value missed-color">{{ totalMissed }}</div>
+        <div class="stat-label">Missed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ totalHoursLogged }}</div>
+        <div class="stat-label">Total Hours</div>
+      </div>
+    </div>
+
+    <!-- No Data -->
+    <div *ngIf="timesheets.length === 0" class="empty-card">
+      <div class="empty-icon">📭</div>
+      <p>No timesheets found. Submit your first timesheet to see history here.</p>
+      <a routerLink="/employee/submit-timesheet" class="btn-primary">Submit First Timesheet</a>
+    </div>
+
+    <!-- Timesheet List -->
+    <div *ngIf="timesheets.length > 0" class="timesheet-list">
+      <div *ngFor="let ts of timesheets" class="timesheet-row">
+        <div class="row-header" (click)="toggleExpand(ts.id)">
+          <div class="row-left">
+            <span class="status-dot" [class.submitted]="ts.status === 'SUBMITTED'" [class.missed]="ts.status === 'MISSED'"></span>
+            <div>
+              <div class="week-label">Week of {{ ts.weekStartDate }}</div>
+              <div class="hours-label">{{ ts.totalHours }} hours logged</div>
+            </div>
+          </div>
+          <div class="row-right">
+            <span class="status-badge" [class.submitted]="ts.status === 'SUBMITTED'" [class.missed]="ts.status === 'MISSED'">
+              {{ ts.status }}
+            </span>
+            <span class="expand-icon">{{ expandedId === ts.id ? '▲' : '▼' }}</span>
+          </div>
+        </div>
+
+        <!-- Expanded Detail -->
+        <div *ngIf="expandedId === ts.id && ts.entries?.length" class="row-detail">
+          <table class="detail-table">
+            <thead>
+              <tr><th>Project</th><th>Hours</th><th>Activity Tags</th></tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of ts.entries">
+                <td class="project-col">{{ e.projectName }}</td>
+                <td>{{ e.hoursWorked }} hrs</td>
+                <td>
+                  <div class="tags-wrap">
+                    <ng-container *ngFor="let tag of (e.activityTags || '').split(',')">
+                      <span *ngIf="tag.trim()" class="tag-chip">{{ tag.trim() }}</span>
+                    </ng-container>
+                    <span *ngIf="!e.activityTags" class="no-tags">No tags</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="expandedId === ts.id && (!ts.entries || ts.entries.length === 0)" class="no-entries">
+          No detailed entries available.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

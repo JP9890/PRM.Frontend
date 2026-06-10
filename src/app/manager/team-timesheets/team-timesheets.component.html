@@ -1,0 +1,45 @@
+<div class="team-timesheets container mt-4">
+  <h2 class="mb-4">Team Timesheets</h2>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label for="weekStart" class="form-label">Week Starting (Monday)</label>
+      <input type="date" id="weekStart" class="form-control" [(ngModel)]="weekStart" (change)="onWeekChange()">
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Loading timesheets...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="!loading && timesheets.length === 0" class="alert alert-warning">
+    No timesheets submitted for this week.
+  </div>
+
+  <div *ngIf="!loading && timesheets.length > 0">
+    <div class="card mb-3" *ngFor="let ts of timesheets">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{{ ts.employeeName }}</h5>
+        <span class="badge bg-light text-dark">{{ ts.status }}</span>
+      </div>
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted">Total Hours: {{ ts.totalHours }}</h6>
+        <table class="table table-sm mt-3">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Hours</th>
+              <th>Activity / Tags</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of ts.entries">
+              <td>{{ entry.projectName }}</td>
+              <td>{{ entry.hoursWorked }}</td>
+              <td>{{ entry.activityTags }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
