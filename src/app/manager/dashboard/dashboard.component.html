@@ -1,0 +1,128 @@
+<div class="manager-dashboard container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Resource Dashboard</h2>
+    <a routerLink="/manager/allocate" class="btn btn-primary">+ Allocate Resource</a>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Loading dashboard...</div>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="dashboard && !loading">
+    <!-- Summary Cards -->
+    <div class="row mb-4 g-3">
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center">
+          <div class="card-body">
+            <div class="display-6 text-danger fw-bold">{{ dashboard.benchCount }}</div>
+            <p class="text-muted mb-0">On Bench</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center">
+          <div class="card-body">
+            <div class="display-6 text-warning fw-bold">{{ dashboard.partialCount }}</div>
+            <p class="text-muted mb-0">Partially Allocated</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center">
+          <div class="card-body">
+            <div class="display-6 text-success fw-bold">{{ (dashboard.active.length - dashboard.partialCount) }}</div>
+            <p class="text-muted mb-0">Fully Allocated</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Resources Table -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-semibold">Team Resources</div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Skills</th>
+              <th>Allocation %</th>
+              <th>Availability</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Bench Employees -->
+            <ng-container *ngFor="let emp of dashboard.onBench">
+              <tr class="table-danger" style="cursor: pointer;" (click)="viewEmployee(emp)">
+                <td><strong>{{ emp.name }}</strong></td>
+                <td>{{ emp.department }}</td>
+                <td><small>{{ emp.skills || '—' }}</small></td>
+                <td>{{ emp.allocationPercentage }}%</td>
+                <td><span class="badge bg-secondary">BENCH</span></td>
+                <td><button class="btn btn-sm btn-outline-primary" [routerLink]="['/manager/allocate']">Allocate</button></td>
+              </tr>
+              <!-- Drill-down row -->
+              <tr *ngIf="selectedEmployee?.id === emp.id" class="table-light">
+                <td colspan="6" class="p-3">
+                  <div class="fw-semibold mb-2">{{ emp.name }} — Detail</div>
+                  <p class="text-muted small mb-1"><strong>Skills:</strong> {{ emp.skills || 'No skills recorded.' }}</p>
+                  <p class="text-muted small mb-0"><strong>Current Projects:</strong> None (on bench)</p>
+                </td>
+              </tr>
+            </ng-container>
+
+            <!-- Active Employees -->
+            <ng-container *ngFor="let emp of dashboard.active">
+              <tr [class.table-warning]="emp.allocationPercentage < 100" style="cursor: pointer;" (click)="viewEmployee(emp)">
+                <td><strong>{{ emp.name }}</strong></td>
+                <td>{{ emp.department }}</td>
+                <td><small>{{ emp.skills || '—' }}</small></td>
+                <td>
+                  <div class="progress" style="height: 8px; min-width: 80px;">
+                    <div class="progress-bar" [class.bg-success]="emp.allocationPercentage < 80"
+                         [class.bg-warning]="emp.allocationPercentage >= 80 && emp.allocationPercentage < 100"
+                         [class.bg-danger]="emp.allocationPercentage === 100"
+                         [style.width.%]="emp.allocationPercentage"></div>
+                  </div>
+                  <small>{{ emp.allocationPercentage }}%</small>
+                </td>
+                <td><span class="badge" [class.bg-warning]="emp.allocationPercentage < 100" [class.bg-danger]="emp.allocationPercentage === 100">{{ emp.availability }}</span></td>
+                <td><button class="btn btn-sm btn-outline-secondary" [routerLink]="['/manager/allocate']">+ Allocate</button></td>
+              </tr>
+              <!-- Drill-down row -->
+              <tr *ngIf="selectedEmployee?.id === emp.id" class="table-light">
+                <td colspan="6" class="p-3">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="fw-semibold">{{ emp.name }} — Active Allocations</div>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="closeDetail()">✕</button>
+                  </div>
+                  <p class="text-muted small mb-2"><strong>Skills:</strong> {{ emp.skills || '—' }}</p>
+                  <table class="table table-sm mb-0" *ngIf="emp.activeAllocations && emp.activeAllocations.length > 0">
+                    <thead class="table-secondary">
+                      <tr><th>Project</th><th>Utilization</th><th>From</th><th>To</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let a of emp.activeAllocations">
+                        <td>{{ a.projectName }}</td>
+                        <td>{{ a.utilizationPercent }}%</td>
+                        <td>{{ a.fromDate }}</td>
+                        <td>{{ a.toDate }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p *ngIf="!emp.activeAllocations || emp.activeAllocations.length === 0" class="small text-muted">No active allocations found.</p>
+                </td>
+              </tr>
+            </ng-container>
+
+            <tr *ngIf="dashboard.onBench.length === 0 && dashboard.active.length === 0">
+              <td colspan="6" class="text-center text-muted py-3">No team members found. Assign employees to this manager first.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

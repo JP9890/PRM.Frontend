@@ -1,0 +1,69 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-inner">
+      <a routerLink="/employee/dashboard" class="back-link">← Dashboard</a>
+      <h1 class="page-title">📌 My Allocations</h1>
+      <p class="page-subtitle">Projects you are currently and previously assigned to</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container"><div class="spinner"></div><p>Loading...</p></div>
+
+  <div *ngIf="!loading" class="page-body">
+    <!-- Error -->
+    <div *ngIf="error" class="error-banner">⛔ {{ error }}</div>
+
+    <!-- Summary Card -->
+    <div class="summary-card">
+      <div class="util-circle" [class.over]="totalUtilization > 100" [class.full]="totalUtilization === 100" [class.partial]="totalUtilization > 0 && totalUtilization < 100">
+        <span class="util-num">{{ totalUtilization }}%</span>
+        <span class="util-text">Utilized</span>
+      </div>
+      <div class="summary-meta">
+        <div class="meta-item"><span class="meta-label">Active Allocations</span><span class="meta-value">{{ allocations.length }}</span></div>
+        <div class="meta-item"><span class="meta-label">Status</span>
+          <span class="meta-value" [class.bench]="totalUtilization === 0" [class.active]="totalUtilization > 0">
+            {{ totalUtilization === 0 ? '🏖 On Bench' : totalUtilization >= 100 ? '🔴 Fully Allocated' : '🟡 Partially Allocated' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="allocations.length === 0" class="empty-card">
+      <div class="empty-icon">🏖</div>
+      <h3>You're on bench</h3>
+      <p>You have no active project allocations. Your manager will assign you to a project soon.</p>
+    </div>
+
+    <!-- Allocation Cards -->
+    <div *ngIf="allocations.length > 0" class="allocations-grid">
+      <div *ngFor="let a of allocations" class="alloc-card" [class.active-alloc]="isActive(a)">
+        <div class="alloc-card-header">
+          <div class="project-info">
+            <h3 class="project-name">{{ a.projectName }}</h3>
+            <span class="active-badge" *ngIf="isActive(a)">● Active</span>
+            <span class="inactive-badge" *ngIf="!isActive(a)">Ended</span>
+          </div>
+          <div class="util-pill">{{ a.utilizationPercent }}%</div>
+        </div>
+        <div class="alloc-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="a.utilizationPercent" [class.full-fill]="a.utilizationPercent >= 100"></div>
+          </div>
+        </div>
+        <div class="alloc-dates">
+          <div class="date-item">
+            <span class="date-label">From</span>
+            <span class="date-value">{{ a.fromDate }}</span>
+          </div>
+          <div class="date-arrow">→</div>
+          <div class="date-item">
+            <span class="date-label">To</span>
+            <span class="date-value">{{ a.toDate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

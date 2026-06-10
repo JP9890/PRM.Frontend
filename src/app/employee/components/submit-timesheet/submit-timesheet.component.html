@@ -1,0 +1,93 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="back-nav">
+        <a routerLink="/employee/dashboard" class="back-link">← Dashboard</a>
+      </div>
+      <h1 class="page-title">📋 Submit Timesheet</h1>
+      <p class="page-subtitle">Log your hours and activity for the week</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div><p>Loading your allocations...</p>
+  </div>
+
+  <div *ngIf="!loading" class="page-body">
+    <!-- Week Picker -->
+    <div class="section-card">
+      <h2 class="section-title">📅 Select Week</h2>
+      <div class="week-input-wrap">
+        <label class="form-label">Week Start Date (Monday)</label>
+        <input type="date" [(ngModel)]="weekStartDate" class="form-input" id="weekStartDate" />
+        <p class="hint">Timesheets are submitted per week starting Monday.</p>
+      </div>
+    </div>
+
+    <!-- No Allocations -->
+    <div *ngIf="rows.length === 0" class="empty-card">
+      <div class="empty-icon">🏖</div>
+      <p>You have no active project allocations. Contact your manager.</p>
+    </div>
+
+    <!-- Project Rows -->
+    <div *ngFor="let row of rows; let i = index" class="section-card project-card">
+      <div class="project-header">
+        <div class="project-badge">Project {{ i + 1 }} / {{ rows.length }}</div>
+        <h3 class="project-title">{{ row.allocation.projectName }}</h3>
+        <div class="alloc-info">
+          <span class="alloc-chip">{{ row.allocation.utilizationPercent }}% allocation</span>
+          <span class="hours-cap">Max {{ (row.allocation.utilizationPercent / 100) * 40 | number:'1.0-0' }} hrs</span>
+        </div>
+      </div>
+
+      <div class="hours-input-row">
+        <label class="form-label" [for]="'hours_' + i">Hours Worked This Week</label>
+        <input
+          type="number"
+          [id]="'hours_' + i"
+          [(ngModel)]="row.hoursWorked"
+          [max]="(row.allocation.utilizationPercent / 100) * 40"
+          min="0" step="1"
+          class="form-input hours-input"
+          placeholder="0"
+        />
+      </div>
+
+      <div class="tags-section">
+        <label class="form-label">Activity Tags <span class="optional">(select all that apply)</span></label>
+        <div class="tags-grid">
+          <button
+            *ngFor="let tag of activityTags"
+            type="button"
+            class="tag-btn"
+            [class.selected]="isTagSelected(row, tag)"
+            (click)="toggleTag(row, tag)"
+          >{{ tag }}</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary + Submit -->
+    <div *ngIf="rows.length > 0" class="section-card submit-card">
+      <div class="summary-bar">
+        <div class="summary-item">
+          <span class="sum-label">Total Hours</span>
+          <span class="sum-value" [class.exceeded]="totalHoursExceeded">{{ totalHours }} / {{ maxWeeklyHours }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="sum-label">Projects</span>
+          <span class="sum-value">{{ rows.length }}</span>
+        </div>
+      </div>
+      <div *ngIf="error" class="error-msg">⛔ {{ error }}</div>
+      <div *ngIf="totalHoursExceeded" class="error-msg">⛔ Total hours exceed the weekly maximum of {{ maxWeeklyHours }}.</div>
+      <button class="btn-submit" (click)="onSubmit()" [disabled]="submitting || totalHoursExceeded" id="submitTimesheetBtn">
+        <span *ngIf="!submitting">✓ Submit Timesheet</span>
+        <span *ngIf="submitting">Submitting...</span>
+      </button>
+    </div>
+  </div>
+</div>

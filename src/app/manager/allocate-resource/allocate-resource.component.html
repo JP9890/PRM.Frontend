@@ -1,0 +1,166 @@
+<div class="container mt-4">
+  <div class="d-flex align-items-center mb-4">
+    <a routerLink="/manager/dashboard" class="text-decoration-none small me-3">&larr; Back to Dashboard</a>
+    <h2 class="mb-0">Allocate Resource</h2>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <!-- Step Indicator -->
+  <div class="d-flex align-items-center mb-4 gap-2">
+    <span class="badge rounded-pill px-3 py-2" [class.bg-primary]="step === 'selectProject'" [class.bg-success]="step !== 'selectProject'">
+      1. Select Project
+    </span>
+    <span class="text-muted">›</span>
+    <span class="badge rounded-pill px-3 py-2" [class.bg-primary]="step === 'selectEmployee'" [class.bg-secondary]="step === 'selectProject'" [class.bg-success]="step === 'confirm'">
+      2. Select Employee
+    </span>
+    <span class="text-muted">›</span>
+    <span class="badge rounded-pill px-3 py-2" [class.bg-primary]="step === 'confirm'" [class.bg-secondary]="step !== 'confirm'">
+      3. Confirm
+    </span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <div class="spinner-border text-primary"></div>
+  </div>
+
+  <!-- STEP 1: Select Project -->
+  <div *ngIf="!isLoading && step === 'selectProject'">
+    <h5 class="mb-3">Select a Project to Allocate Resources To</h5>
+    <div class="row g-3">
+      <div class="col-md-6 col-lg-4" *ngFor="let p of projects">
+        <div class="card h-100 shadow-sm border-0" style="cursor: pointer;" (click)="selectProject(p)">
+          <div class="card-body">
+            <h6 class="card-title">{{ p.name }}</h6>
+            <p class="text-muted small mb-1">End: {{ p.endDate }}</p>
+            <span class="badge bg-light text-dark border small">{{ p.health }}</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="projects.length === 0" class="col-12">
+        <div class="alert alert-info">No projects found.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Select Employee + View Current Allocations -->
+  <div *ngIf="!isLoading && step === 'selectEmployee'">
+    <button class="btn btn-sm btn-outline-secondary mb-3" (click)="goBack()">
+      &larr; Change Project
+    </button>
+    <div class="alert alert-primary mb-3">
+      <strong>Project:</strong> {{ selectedProject?.name }}
+    </div>
+
+    <!-- Current Allocations on this project -->
+    <div class="card mb-4 border-0 shadow-sm" *ngIf="activeAllocations.length > 0">
+      <div class="card-header fw-semibold">Current Allocations on this Project</div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Employee</th>
+              <th>Utilization</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of activeAllocations">
+              <td>{{ a.employeeName }}</td>
+              <td>{{ a.utilizationPercent }}%</td>
+              <td>{{ a.fromDate }}</td>
+              <td>{{ a.toDate }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-danger" (click)="endAllocation(a)">End</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h5 class="mb-3">Select an Employee to Allocate</h5>
+    <div class="row g-3">
+      <div class="col-md-6 col-lg-4" *ngFor="let emp of employees">
+        <div class="card h-100 shadow-sm border-0"
+             [class.border-success]="emp.allocationPercentage < 100"
+             style="cursor: pointer;"
+             (click)="selectEmployee(emp)">
+          <div class="card-body">
+            <h6 class="card-title">{{ emp.name }}</h6>
+            <p class="text-muted small mb-1">{{ emp.department }}</p>
+            <div class="mb-2">
+              <small class="text-muted">Skills: </small>
+              <small>{{ emp.skills || '—' }}</small>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge" [class.bg-success]="emp.allocationPercentage === 0"
+                    [class.bg-warning]="emp.allocationPercentage > 0 && emp.allocationPercentage < 100"
+                    [class.bg-danger]="emp.allocationPercentage === 100">
+                {{ emp.availability }}
+              </span>
+              <small class="text-muted">{{ emp.allocationPercentage }}% used</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="employees.length === 0" class="col-12">
+        <div class="alert alert-warning">No team employees found. Assign employees to this manager first.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Confirm Allocation -->
+  <div *ngIf="!isLoading && step === 'confirm'">
+    <button class="btn btn-sm btn-outline-secondary mb-3" (click)="goBack()">
+      &larr; Change Employee
+    </button>
+
+    <div class="card border-0 shadow-sm" style="max-width: 600px;">
+      <div class="card-header bg-primary text-white fw-semibold">Confirm Allocation</div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Project</dt>
+          <dd class="col-sm-8">{{ selectedProject?.name }}</dd>
+          <dt class="col-sm-4">Employee</dt>
+          <dd class="col-sm-8">{{ selectedEmployee?.name }}</dd>
+          <dt class="col-sm-4">Current Load</dt>
+          <dd class="col-sm-8">{{ selectedEmployee?.allocationPercentage }}% — {{ selectedEmployee?.availability }}</dd>
+        </dl>
+
+        <hr />
+
+        <form [formGroup]="allocationForm" (ngSubmit)="submitAllocation()">
+          <div class="mb-3">
+            <label class="form-label">Utilization % <small class="text-muted">(max available: {{ freeCapacity }}%)</small></label>
+            <input type="number" class="form-control" formControlName="utilizationPercent"
+                   [max]="freeCapacity" min="1" />
+            <div *ngIf="allocationForm.get('utilizationPercent')?.invalid && allocationForm.get('utilizationPercent')?.touched"
+                 class="text-danger small mt-1">Must be 1–{{ freeCapacity }}%.</div>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label">From Date</label>
+              <input type="date" class="form-control" formControlName="fromDate" />
+            </div>
+            <div class="col-6">
+              <label class="form-label">To Date</label>
+              <input type="date" class="form-control" formControlName="toDate" />
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" [disabled]="allocationForm.invalid || isLoading">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+              Confirm Allocation
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="resetFlow()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
